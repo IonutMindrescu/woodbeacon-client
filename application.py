@@ -10,7 +10,6 @@ import json
 
 GPIO.setwarnings(False)
 
-#data = {"action": "sound-detected", "state": True, "battery": 27.0}
 data = {"action": "sound-detected", "battery": 27, "sound": "chainsaw", "lat": 47.640173, "lng": 26.258861}
 
 D = Dragino("dragino.ini", logging_level=logging.DEBUG)
@@ -18,10 +17,8 @@ D.join()
 while not D.registered():
     print("Waiting")
     sleep(2)
-#sleep(10)
 
-while True:
-    D.send(json.dumps(data))
-    print("Beacon has been sent!")
-    sleep(5)
-
+# > Send the data
+sleep(5)
+D.send(json.dumps(data))
+print("Beacon has been sent!")
