@@ -1,27 +1,42 @@
-#!/usr/bin/env python3
-"""
-    Test harness for dragino module - sends hello world out over LoRaWAN 5 times
-"""
 import logging
-from time import sleep
-import RPi.GPIO as GPIO
-from dragino import Dragino
 import json
+import numpy as np
+import RPi.GPIO as GPIO
+
+from time import sleep
+from dragino import Dragino
+from keras.preprocessing.image import img_to_array, load_img
+
+from audio_recognition import *
 
 GPIO.setwarnings(False)
+chainsaw_model = AudioModel("chainsaw.json", "chainsaw.h5")
+
+D = Dragino("dragino.ini", logging_level=logging.DEBUG)
+D.join()
 
 #data = {"action": "sound-detected", "state": True, "battery": 27.0}
 data = {"action": "sound-detected", "battery": 27, "sound": "chainsaw", "lat": 47.640173, "lng": 26.258861}
 
-D = Dragino("dragino.ini", logging_level=logging.DEBUG)
-D.join()
 while not D.registered():
     print("Waiting")
     sleep(2)
 #sleep(10)
 
-while True:
-    D.send(json.dumps(data))
-    print("Beacon has been sent!")
-    sleep(5)
+def main():
+    while not D.registered():
+        print("Waiting")
+        sleep(2)
 
+    while True:
+        get_sound()
+        img = img_to_array(load_img('rec.png', target_size=(100, 100)))
+        img = np.expand_dims(img, axis=0)
+        predict = chainsaw_model.predict(img)[0][0]
+        print(predict)
+        if predict >= 0.9999 and predict <= 1.0:
+            D.send(json.dumps(data))
+            print("Beacon has been sent!")
+
+if __name__ == "__main__":
+    main()
