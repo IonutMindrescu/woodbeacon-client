@@ -28,14 +28,13 @@ D.join()
 while not D.registered():
     print("Waiting")
     sleep(2)
-#sleep(10)
-
-# Configurations Variables
-duration = 3 #seconds
-sample_rate = 22400 #frequency
 
 # Load ML model
-chainsaw_model = AudioModel("model.json", "model.h5")
+
+model = load_model('test_model.h5')
+model.compile(loss='binary_crossentropy',
+              optimizer='rmsprop',
+              metrics=['accuracy'])
 
 def main():
     number_of_detection = 0
@@ -43,10 +42,12 @@ def main():
         get_sound()
         img = img_to_array(load_img('rec.png', target_size=(100, 100)))
         img = np.expand_dims(img, axis=0)
-        predict = chainsaw_model.predict(img)[0][0]
-        print(predict)
-        if predict >= 0.999: #predict == 1.0:
-             number_of_detection += 1
+        predict = model.predict_classes(img, batch_size=10)t
+        if predict[0][0] == 1:
+            number_of_detection += 1
+        else:
+            number_of_detection = 0
+
         if number_of_detection == 2:
             D.send(json.dumps(data))
             print("Sound detected, beacon has been sent!")

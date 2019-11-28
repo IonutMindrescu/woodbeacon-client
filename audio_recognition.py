@@ -1,14 +1,15 @@
-import os
-import sounddevice
 import numpy as np
-import librosa.display
+import sounddevice
+import librosa.display, os, gc
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
+from keras.models import model_from_json, load_model
+from keras.preprocessing.image import img_to_array, load_img
 
-from keras.models import model_from_json
-
-duration = 3
-sample_rate=48000
+# Configurations Variables
+duration = 1
+sample_rate = 48000
 
 def get_sound():
     audio = sounddevice.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1)
@@ -44,18 +45,3 @@ def extract_spectrogram(fname, iname):
     plt.close(fig)
     plt.close('all')
     del audio, S, log_S, ax, fig
-
-class AudioModel(object):
-
-    def __init__(self, model_json_file, model_weights_file):
-        # load model from JSON file
-        with open(model_json_file, "r") as json_file:
-            loaded_model_json = json_file.read()
-            self.loaded_model = model_from_json(loaded_model_json)
-
-        self.loaded_model.load_weights(model_weights_file)
-        self.loaded_model._make_predict_function()
-
-    def predict(self, img):
-        self.preds = self.loaded_model.predict(img)
-        return self.preds
