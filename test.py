@@ -20,6 +20,7 @@ from keras.preprocessing.image import img_to_array, load_img
 
 GPIO.setwarnings(False)
 
+# JSON Data to be sent
 data = {"action": "sound-detected", "battery": 27, "sound": "drujba", "lat": 47.640173, "lng": 26.258861}
 
 D = Dragino("dragino.ini", logging_level=logging.DEBUG)
@@ -29,10 +30,12 @@ while not D.registered():
     sleep(2)
 #sleep(10)
 
+# Configurations Variables
 duration = 3 #seconds
-sample_rate=22400 #frequency
+sample_rate = 22400 #frequency
 
-chainsaw_model = AudioModel("chainsaw.json", "chainsaw.h5")
+# Load ML model
+chainsaw_model = AudioModel("model.json", "model.h5")
 
 def main():
     number_of_detection = 0
@@ -46,7 +49,7 @@ def main():
              number_of_detection += 1
         if number_of_detection == 2:
             D.send(json.dumps(data))
-            print("Beacon has been sent!")
+            print("Sound detected, beacon has been sent!")
             number_of_detection = 0
 
 if __name__ == "__main__":
