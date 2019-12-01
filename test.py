@@ -39,7 +39,9 @@ model.compile(loss='binary_crossentropy',
 def main():
     number_of_detection = 0
     while True:
-        get_sound()
+        sound = get_sound()
+        if not sound:
+            continue
         img = img_to_array(load_img('rec.png', target_size=(100, 100)))
         img = np.expand_dims(img, axis=0)
         predict = model.predict_classes(img, batch_size=10)
