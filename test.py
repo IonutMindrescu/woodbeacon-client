@@ -42,14 +42,14 @@ def main():
         get_sound()
         img = img_to_array(load_img('rec.png', target_size=(100, 100)))
         img = np.expand_dims(img, axis=0)
-        predict = model.predict_classes(img, batch_size=10)t
+        predict = model.predict_classes(img, batch_size=10)
         if predict[0][0] == 1:
             number_of_detection += 1
         else:
             number_of_detection = 0
 
         if number_of_detection == 2:
-            D.send(json.dumps(data))
+#            D.send(json.dumps(data))
             print("Sound detected, beacon has been sent!")
             number_of_detection = 0
 

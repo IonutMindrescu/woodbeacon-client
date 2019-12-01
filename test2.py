@@ -7,17 +7,20 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from keras.models import model_from_json, load_model
 from keras.preprocessing.image import img_to_array, load_img
 
-duration = 1
-sample_rate = 48000
+#duration = 1
+#sample_rate = 48000
 
 def get_sound():
     # import ipdb; ipdb.set_trace()
-    # duration = 1
-    # sample_rate=48000
+    duration = 1
+    sample_rate=48000
     audio = sounddevice.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1)
     audio = np.squeeze(audio)
     sr=sample_rate
     sounddevice.wait()
+    volume = np.linalg.norm(audio)*10
+    if volume < 7:
+        return None
     S = librosa.feature.melspectrogram(audio, sr=sr, n_mels=128)
     log_S = librosa.power_to_db(S, ref=np.max)
     fig = plt.figure(figsize=[1, 1])
@@ -31,6 +34,7 @@ def get_sound():
     plt.close(fig)
     plt.close('all')
     del audio, S, log_S, ax, fig
+    return 1
 
 def extract_spectrogram(fname, iname):
     audio, sr = librosa.load(fname, res_type='kaiser_fast')
@@ -62,7 +66,9 @@ model.compile(loss='binary_crossentropy',
 def main():
     number_of_detection = 0
     while True:
-        get_sound()
+        sound = get_sound()
+        if sound == None:
+            continue
         img = img_to_array(load_img('rec.png', target_size=(100, 100)))
         img = np.expand_dims(img, axis=0)
         predict = model.predict_classes(img, batch_size=10)
